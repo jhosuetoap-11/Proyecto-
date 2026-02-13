@@ -1,0 +1,91 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define W 128
+#define H 64
+#define OLED_RESET -1
+
+Adafruit_SSD1306 display(W,H,&Wire,OLED_RESET);
+
+int ledFlash = 6;
+int ledR=9;
+int ledG=10;
+int ledB=11;
+
+void setup(){
+
+ pinMode(ledFlash,OUTPUT);
+ pinMode(ledR,OUTPUT);
+ pinMode(ledG,OUTPUT);
+ pinMode(ledB,OUTPUT);
+
+ display.begin(SSD1306_SWITCHCAPVCC,0x3C);
+ display.clearDisplay();
+}
+
+void drawBar(int x,int y,int value){
+
+ int width = map(value,70,110,0,80);
+
+ display.drawRect(x,y,82,10,WHITE);
+ display.fillRect(x+1,y+1,width,8,WHITE);
+}
+
+void loop(){
+
+ int rpm=random(800,3500);
+ int temp=random(70,110);
+ int fuel=random(20,100);
+ float bat=random(115,140)/10.0;
+
+ display.clearDisplay();
+
+ display.setTextSize(1);
+ display.setTextColor(WHITE);
+
+ display.setCursor(20,0);
+ display.println("ECU VEHICULO");
+
+ display.setCursor(0,12);
+ display.print("RPM:");
+ display.println(rpm);
+
+ display.setCursor(0,22);
+ display.print("TEMP:");
+ drawBar(40,22,temp);
+
+ display.setCursor(0,38);
+ display.print("BAT:");
+ display.print(bat);
+ display.println("V");
+
+ display.setCursor(0,50);
+ display.print("FUEL:");
+ display.print(fuel);
+ display.println("%");
+
+ // ALERTA
+ if(temp>95){
+   display.setCursor(80,50);
+   display.print("ALERTA");
+
+   digitalWrite(ledFlash,HIGH);
+   analogWrite(ledR,255);
+   analogWrite(ledG,0);
+   analogWrite(ledB,0);
+ }
+ else{
+   display.setCursor(80,50);
+   display.print("NORMAL");
+
+   digitalWrite(ledFlash,LOW);
+   analogWrite(ledR,0);
+   analogWrite(ledG,255);
+   analogWrite(ledB,0);
+ }
+
+ display.display();
+
+ delay(1200);
+}
